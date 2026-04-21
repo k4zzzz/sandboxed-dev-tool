@@ -22,11 +22,17 @@ if ! command -v brew &>/dev/null; then
   echo "==> Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-  # Add brew to PATH for Apple Silicon vs Intel
+  # Add brew to PATH — platform-specific locations
   if [[ -f /opt/homebrew/bin/brew ]]; then
+    # Apple Silicon macOS
     eval "$(/opt/homebrew/bin/brew shellenv)"
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$SHELL_RC"
+  elif [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    # Linux (Lima VM or native Linux)
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$SHELL_RC"
   else
+    # Intel macOS (fallback)
     eval "$(/usr/local/bin/brew shellenv)"
     echo 'eval "$(/usr/local/bin/brew shellenv)"' >> "$SHELL_RC"
   fi
