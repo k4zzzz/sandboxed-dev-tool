@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TOOL_REPO="https://github.com/k4zzzz/sandboxed-dev-tool"
+TOOL_REPO="https://raw.githubusercontent.com/k4zzzz/sandboxed-dev-tool/refs/heads/main/install.sh"
 INSTALL_DIR="$HOME/.dev-tool"
 SHELL_RC=""
 
