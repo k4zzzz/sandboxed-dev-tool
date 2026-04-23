@@ -15,7 +15,7 @@ app = typer.Typer(no_args_is_help=True)
 console = Console()
 
 VM_NAME = "dev"
-TEMPLATES_REPO = "https://github.com/k4zzz/dev-templates"
+TEMPLATES_REPO = "https://github.com/k4zzzz/dev-templates"
 LIMA_YAML_PATH = "lima/dev.yaml"  # path inside the templates repo
 
 

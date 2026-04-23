@@ -16,7 +16,7 @@ from rich.table import Table
 app = typer.Typer(no_args_is_help=True)
 console = Console()
 
-TEMPLATES_REPO = "https://github.com/k4zzz/dev-templates"
+TEMPLATES_REPO = "https://github.com/k4zzzz/dev-templates"
 TEMPLATES_DIR_NAME = "templates"  # subdirectory inside the repo
 
 
