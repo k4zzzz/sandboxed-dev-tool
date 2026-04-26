@@ -89,8 +89,8 @@ def create() -> None:
         console.print(f"  Starting VM (provisioning may take a few minutes)...")
         _run(["limactl", "start", VM_NAME])
 
-    console.print(f"\n  [green]✓ VM '{VM_NAME}' is ready.[/green]")
-    console.print("  Shell in with:  [bold]limactl shell dev[/bold]\n")
+        console.print(f"\n  [green]✓ VM '{VM_NAME}' is ready.[/green]")
+        _run(["limactl", "shell", VM_NAME])
 
 
 @app.command()
@@ -100,6 +100,7 @@ def start() -> None:
     console.print(f"  Starting [bold]{VM_NAME!r}[/bold]...")
     _run(["limactl", "start", VM_NAME])
     console.print(f"  [green]✓ VM '{VM_NAME}' started.[/green]\n")
+    _run(["limactl", "shell", VM_NAME])
 
 
 @app.command()
@@ -124,4 +125,5 @@ def delete() -> None:
     _run(["limactl", "stop", "--force", VM_NAME], check=False)
     console.print(f"  Deleting [bold]{VM_NAME!r}[/bold]...")
     _run(["limactl", "delete", "--force", VM_NAME])
+    _run(["limactl", "prune"])
     console.print(f"  [green]✓ VM '{VM_NAME}' deleted.[/green]\n")
