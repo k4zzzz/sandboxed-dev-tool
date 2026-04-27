@@ -113,6 +113,13 @@ def stop() -> None:
 
 
 @app.command()
+def shell() -> None:
+    """Shell into the VM."""
+    _require_limactl()
+    _run(["limactl", "shell", VM_NAME])
+
+
+@app.command()
 def delete() -> None:
     """Stop and permanently delete the VM."""
     _require_limactl()
