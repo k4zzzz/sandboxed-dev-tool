@@ -6,6 +6,7 @@ Run these on macOS, not inside the VM.
 import subprocess
 import sys
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 import typer
@@ -17,6 +18,21 @@ console = Console()
 VM_NAME = "dev"
 TEMPLATES_REPO = "https://github.com/k4zzzz/dev-templates"
 LIMA_YAML_PATH = "lima/dev.yaml"  # path inside the templates repo
+
+PRUNE_SCRIPT = """\
+echo "  pruning stopped containers..."
+podman container prune -f
+echo "  pruning unused images..."
+podman image prune -a -f
+echo "  pruning anonymous volumes..."
+podman volume prune -f
+echo "  pruning buildah..."
+buildah prune --all 2>/dev/null || true
+echo "  vacuuming journal..."
+sudo journalctl --vacuum-size=50M
+echo "  trimming filesystem..."
+sudo fstrim -av
+"""
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -63,6 +79,38 @@ def _fetch_lima_yaml(dest: Path) -> None:
         shutil.copy(src, dest)
 
 
+def _lima_shell(remote_cmd: str) -> None:
+    """Run a command inside the VM, streaming output."""
+    _run(["limactl", "shell", VM_NAME, "--", "bash", "-c", remote_cmd])
+
+
+def _lima_capture(remote_cmd: str) -> str:
+    """Run a command inside the VM and return its stdout."""
+    result = subprocess.run(
+        ["limactl", "shell", VM_NAME, "--", "bash", "-c", remote_cmd],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout.strip()
+
+
+def _vm_disk_used() -> str:
+    return _lima_capture("df -h / | awk 'NR==2 {print $3}'")
+
+
+def _host_disk_image_info() -> str:
+    disk_path = Path.home() / ".lima" / VM_NAME / "disk"
+    result = subprocess.run(
+        ["ls", "-lsh", str(disk_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    parts = result.stdout.split()
+    return f"  {parts[0]} → {parts[5]}"
+
+
 # ── Commands ──────────────────────────────────────────────────────────────────
 
 
@@ -92,6 +140,8 @@ def create() -> None:
         console.print(f"\n  [green]✓ VM '{VM_NAME}' is ready.[/green]")
         _run(["limactl", "shell", VM_NAME])
 
+    clean()
+
 
 @app.command()
 def start() -> None:
@@ -101,6 +151,7 @@ def start() -> None:
     _run(["limactl", "start", VM_NAME])
     console.print(f"  [green]✓ VM '{VM_NAME}' started.[/green]\n")
     _run(["limactl", "shell", VM_NAME])
+    clean()
 
 
 @app.command()
@@ -117,6 +168,7 @@ def shell() -> None:
     """Shell into the VM."""
     _require_limactl()
     _run(["limactl", "shell", VM_NAME])
+    clean()
 
 
 @app.command()
@@ -134,3 +186,20 @@ def delete() -> None:
     _run(["limactl", "delete", "--force", VM_NAME])
     _run(["limactl", "prune"])
     console.print(f"  [green]✓ VM '{VM_NAME}' deleted.[/green]\n")
+
+
+@app.command()
+def clean() -> None:
+    """Prune containers, images, volumes, and trim the VM filesystem."""
+    _require_limactl()
+
+    console.print(f"── Podman cleanup: [cyan]{datetime.now().strftime('%c')}[/cyan] ──")
+
+    console.print(f"  VM disk used before: [yellow]{_vm_disk_used()}[/yellow]")
+    _lima_shell(PRUNE_SCRIPT)
+    console.print(f"  VM disk used after:  [green]{_vm_disk_used()}[/green]")
+
+    console.print("  Host disk image (actual blocks → logical):")
+    console.print(_host_disk_image_info())
+
+    console.print("── [green]Done[/green] ──")
