@@ -140,6 +140,8 @@ def create() -> None:
         console.print(f"\n  [green]✓ VM '{VM_NAME}' is ready.[/green]")
         _run(["limactl", "shell", VM_NAME])
 
+    _run(["echo", "export TERM=xterm-256color", ">>", "~/.bashrc"])
+    _run(["source", "~/.bashrc"])
     clean()
 
 
@@ -151,6 +153,7 @@ def start() -> None:
     _run(["limactl", "start", VM_NAME])
     console.print(f"  [green]✓ VM '{VM_NAME}' started.[/green]\n")
     _run(["limactl", "shell", VM_NAME])
+    _run(["source", "~/.bashrc"])
     clean()
 
 
