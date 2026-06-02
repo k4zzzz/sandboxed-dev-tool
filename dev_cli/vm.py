@@ -153,7 +153,6 @@ def start() -> None:
     _run(["limactl", "start", VM_NAME])
     console.print(f"  [green]✓ VM '{VM_NAME}' started.[/green]\n")
     _run(["limactl", "shell", VM_NAME])
-    _run(["source", "~/.bashrc"])
     clean()
 
 
@@ -206,3 +205,4 @@ def clean() -> None:
     console.print(_host_disk_image_info())
 
     console.print("── [green]Done[/green] ──")
+    _run(["source", "~/.bashrc"])
