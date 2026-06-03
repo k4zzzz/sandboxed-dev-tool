@@ -141,8 +141,6 @@ def create() -> None:
         _run(["limactl", "shell", VM_NAME])
 
     _run(["echo", "export TERM=xterm-256color", ">>", "~/.bashrc"])
-    _run(["source", "~/.bashrc"])
-    clean()
 
 
 @app.command()
@@ -153,7 +151,7 @@ def start() -> None:
     _run(["limactl", "start", VM_NAME])
     console.print(f"  [green]✓ VM '{VM_NAME}' started.[/green]\n")
     _run(["limactl", "shell", VM_NAME])
-    clean()
+    _run(["source ~/.bashrc"])
 
 
 @app.command()
@@ -163,6 +161,7 @@ def stop() -> None:
     console.print(f"  Stopping [bold]{VM_NAME!r}[/bold]...")
     _run(["limactl", "stop", VM_NAME])
     console.print(f"  [green]✓ VM '{VM_NAME}' stopped.[/green]\n")
+    clean()
 
 
 @app.command()
@@ -170,7 +169,7 @@ def shell() -> None:
     """Shell into the VM."""
     _require_limactl()
     _run(["limactl", "shell", VM_NAME])
-    clean()
+    _run(["source ~/.bashrc"])
 
 
 @app.command()
@@ -188,6 +187,7 @@ def delete() -> None:
     _run(["limactl", "delete", "--force", VM_NAME])
     _run(["limactl", "prune"])
     console.print(f"  [green]✓ VM '{VM_NAME}' deleted.[/green]\n")
+    clean()
 
 
 @app.command()
@@ -205,4 +205,3 @@ def clean() -> None:
     console.print(_host_disk_image_info())
 
     console.print("── [green]Done[/green] ──")
-    _run(["source", "~/.bashrc"])
